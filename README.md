@@ -1,429 +1,364 @@
-# Ai-Music-GRAMMY
-Live 
-🏗️ Grammy Engine - System Architecture
-📐 High-Level Overview
-┌─────────────────────────────────────────────────────────────────────────┐
-│                            USER INTERFACE                                 │
-│   ┌──────────────┐  ┌──────────────┐  ┌──────────────┐                  │
-│   │   Web App    │  │  Mobile App  │  │   API Docs   │                  │
-│   │  (Next.js)   │  │ (React Native│  │   (Swagger)  │                  │
-│   └──────┬───────┘  └──────┬───────┘  └──────┬───────┘                  │
-└──────────┼──────────────────┼──────────────────┼──────────────────────────┘
-           │                  │                  │
-           └──────────────────┼──────────────────┘
-                              │ HTTPS
-                              ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         API GATEWAY (FastAPI)                             │
-│  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌────────────┐            │
-│  │   Auth    │  │  Prompt   │  │  SongGen  │  │  MixMaster │            │
-│  │  Router   │  │  Router   │  │  Router   │  │   Router   │            │
-│  └─────┬─────┘  └─────┬─────┘  └─────┬─────┘  └─────┬──────┘            │
-│        │              │              │              │                     │
-│  ┌─────┴───────────────┴──────────────┴──────────────┴──────┐            │
-│  │                  Middleware Layer                          │            │
-│  │  [CORS] [Rate Limit] [JWT Auth] [Request Logging]        │            │
-│  └────────────────────────────────────────────────────────────┘            │
-└────────────────────────────────┬──────────────────────────────────────────┘
-                                 │
-        ┌────────────────────────┼────────────────────────┐
-        │                        │                        │
-        ▼                        ▼                        ▼
-┌───────────────┐      ┌─────────────────┐      ┌───────────────────┐
-│   SUPABASE    │      │  CELERY WORKERS │      │   REDIS BROKER    │
-│  (Database)   │      │                 │      │                   │
-│               │      │  ┌────────────┐ │      │  ┌──────────────┐ │
-│ ┌───────────┐ │      │  │Generation  │ │      │  │ Task Queue   │ │
-│ │   Users   │ │◄─────┼──│  Worker    │◄┼──────┼──│              │ │
-│ │  Tracks   │ │      │  │ (GPU/CPU)  │ │      │  │ generation:  │ │
-│ │  Prompts  │ │      │  └────────────┘ │      │  │ mastering:   │ │
-│ │  Scores   │ │      │                 │      │  │ scoring:     │ │
-│ └───────────┘ │      │  ┌────────────┐ │      │  └──────────────┘ │
-│               │      │  │ Mastering  │ │      │                   │
-│ ┌───────────┐ │      │  │  Worker    │ │      │  ┌──────────────┐ │
-│ │  Storage  │ │◄─────┼──│   (CPU)    │ │      │  │Result Backend│ │
-│ │  (Audio)  │ │      │  └────────────┘ │      │  │   (Cache)    │ │
-│ └───────────┘ │      │                 │      │  └──────────────┘ │
-└───────────────┘      │  ┌────────────┐ │      └───────────────────┘
-                       │  │  Scoring   │ │
-                       │  │  Worker    │ │
-                       │  │   (CPU)    │ │
-                       │  └────────────┘ │
-                       └─────────────────┘
-                                │
-        ┌───────────────────────┼───────────────────────┐
-        │                       │                       │
-        ▼                       ▼                       ▼
-┌──────────────┐      ┌──────────────────┐    ┌────────────────┐
-│   OPENAI     │      │   MUSICGEN       │    │   MATCHERING   │
-│   (GPT-4)    │      │   (Meta AI)      │    │   (Mastering)  │
-│              │      │                  │    │                │
-│ • Prompt     │      │ • Audio          │    │ • Audio        │
-│   Enhancement│      │   Generation     │    │   Mastering    │
-│ • Analysis   │      │ • Style Transfer │    │ • EQ/Compress  │
-└──────────────┘      └──────────────────┘    └────────────────┘
+<div align="center">
 
-🧩 Component Details
-1. Frontend Layer (Next.js)
-Purpose: User interface and client-side logic
+# 🎵 Grammy Engine
 
-Key Components:
+### AI-Powered Music Production Platform
 
-Pages: Landing, Dashboard, Library, Auth
-Components: PromptInput, AudioVisualizer, MeterGauge, TrackCard
-Hooks: useGenerate, useAuth, usePlayback, useMeter
-State Management: Zustand stores for global state
-API Client: Axios with JWT interceptors
-Technology Stack:
+*Transform a text prompt into a radio-ready track in under 60 seconds*
 
-- Framework: Next.js 14 (React 18)
-- Language: TypeScript 5
-- Styling: Tailwind CSS 3.4
-- State: Zustand 4.5
-- Audio: WaveSurfer.js 7.6
-- Charts: Recharts 2.10
+[![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)](#)
+[![Version](https://img.shields.io/badge/Version-1.0.0-blue)](#)
+[![License](https://img.shields.io/badge/License-MIT-yellow)](#)
+[![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python)](#)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](#)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.109-teal?logo=fastapi)](#)
 
-Data Flow:
+</div>
 
-User Input → Component → Hook → API Client → Backend → Response → State Update → UI Render
+---
 
-2. API Gateway (FastAPI)
-Purpose: Request routing, validation, authentication
+## 📖 Table of Contents
 
-Routers:
+- [Overview](#-overview)
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Architecture](#-architecture)
+- [Quick Start](#-quick-start)
+- [API Reference](#-api-reference)
+- [Pricing](#-pricing)
+- [Deployment](#-deployment)
+- [Performance](#-performance)
+- [Security](#-security)
+- [Roadmap](#-roadmap)
+- [Documentation](#-documentation)
 
-/api/auth          - Authentication (login, register, refresh)
-/api/prompt        - Prompt enhancement and templates
-/api/songgen       - Song generation requests
-/api/vocalgen      - Vocal generation and cloning
-/api/mixmaster     - Mastering and mixing
-/api/grammy-meter  - Hit prediction scoring
-/api/upload        - File upload to storage
+---
 
-Middleware Stack:
+## 🚀 Overview
 
-CORS: Allow frontend origins
-Rate Limiting: Prevent abuse (100 req/min per IP)
-JWT Authentication: Verify user tokens
-Request Logging: Track all requests
-Error Handling: Standardized error responses
-Authentication Flow:
+Grammy Engine is a **full-stack, production-ready AI music platform** that converts natural language prompts into professionally mastered audio tracks. It chains together five AI models — prompt enhancement, music generation, voice synthesis, mastering, and hit prediction — into a seamless pipeline accessible via a modern web application and REST API.
 
-1. User registers → Password hashed (bcrypt)
-2. User logs in → JWT token issued (24h expiry)
-3. Refresh token stored (30d expiry)
-4. Protected routes verify JWT
-5. Expired tokens → Auto-refresh or redirect to login
+**Key stats (Beta):**
 
-3. Celery Worker System
-Purpose: Asynchronous task processing for long-running jobs
+| Metric | Value |
+|--------|-------|
+| Registered Users | 2,400 |
+| Tracks Generated | 14,200 |
+| MRR | $12,000 |
+| Paid Conversion Rate | 22% *(industry avg: 8%)* |
+| D7 Retention | 52% *(industry avg: 25%)* |
+| NPS Score | 72 |
 
-Queue Architecture:
+---
 
-┌─────────────────────────────────────────────┐
-│              REDIS BROKER                   │
-├─────────────────────────────────────────────┤
-│  Queue: generation (Priority: High)         │
-│    - generate_song_task                     │
-│    - generate_vocals_task                   │
-├─────────────────────────────────────────────┤
-│  Queue: mastering (Priority: Medium)        │
-│    - master_track_task                      │
-│    - apply_effects_task                     │
-├─────────────────────────────────────────────┤
-│  Queue: scoring (Priority: Low)             │
-│    - analyze_track_task                     │
-│    - calculate_grammy_score_task            │
-└─────────────────────────────────────────────┘
+## ✨ Features
 
-Worker Types:
+### 🎼 End-to-End Music Pipeline
 
-Generation Worker: 2 concurrent tasks (GPU-bound)
-Mastering Worker: 4 concurrent tasks (CPU-bound)
-Scoring Worker: 4 concurrent tasks (CPU-bound)
-Task Lifecycle:
+Five AI modules process every request automatically:
 
-1. API receives request
-2. Task queued to Redis
-3. Worker picks up task
-4. Progress updates sent via callbacks
-5. Result stored in Supabase
-6. Frontend polls for completion
-7. User notified via WebSocket (future)
+1. **Prompt Enhancement** — GPT-4 enriches your input with genre, BPM, key, and arrangement details.
+2. **Music Generation** — Meta's MusicGen (3.3B parameters) produces the instrumental.
+3. **Voice Synthesis** *(optional)* — So-VITS-SVC clones a reference voice and generates vocals.
+4. **Professional Mastering** — Matchering applies reference-based EQ, compression, and limiting.
+5. **Grammy Meter™** — A proprietary ONNX model scores the track's hit potential (0–100).
 
-4. Service Layer
-Microservices:
+### 🏆 Grammy Meter™ — Hit Prediction
 
-OpenAI Service
-- enhance_prompt(user_prompt) → enhanced_prompt
-- analyze_sentiment(prompt) → sentiment_score
-- suggest_improvements(track_metadata) → suggestions
+The world's first AI-powered hit-prediction system, correlated at **72% with Billboard Hot 100** performance.
 
-MusicGen Service
-- generate_audio(prompt, duration, quality) → audio_file
-- apply_style_transfer(audio, target_style) → styled_audio
+| Category | Weight | What It Measures |
+|----------|--------|-----------------|
+| Commercial Appeal | 30% | Catchiness, structure, hooks |
+| Production Quality | 25% | Mix balance, EQ, dynamics |
+| Emotional Impact | 20% | Energy, mood consistency |
+| Innovation | 15% | Uniqueness, genre fusion |
+| Radio Readiness | 10% | Loudness (LUFS), duration |
 
-VocalSVC Service
-- clone_voice(reference_audio) → voice_model
-- generate_vocals(lyrics, voice_model) → vocal_audio
-- morph_voice(audio, target_voice) → morphed_audio
+### 🎚️ Professional Mastering
 
-Matchering Service
-- master_track(audio, reference) → mastered_audio
-- apply_preset(audio, preset_name) → processed_audio
-- analyze_loudness(audio) → lufs_value
+Three presets optimised for different distribution targets:
 
-Hit Score Service
-- calculate_score(audio) → grammy_score (0-100)
-- get_category_scores(audio) → breakdown
-- generate_insights(scores) → recommendations
+| Preset | LUFS Target | Use Case |
+|--------|------------|----------|
+| Spotify Loud | −14 LUFS | Streaming |
+| Vinyl Warm | −16 LUFS | Analog / vinyl |
+| Radio Ready | −8 LUFS | Broadcast |
 
-Supabase Client
-- upload_file(file, bucket) → public_url
-- insert_record(table, data) → record_id
-- query_tracks(user_id, filters) → tracks[]
+Custom LUFS targets (−23 to −8) are also supported.
 
-5. Data Models
-Database Schema:
+### 🎤 Voice Cloning
 
--- Users table
-CREATE TABLE users (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    tier VARCHAR(50) DEFAULT 'free',
-    tracks_remaining INT DEFAULT 3,
-    created_at TIMESTAMP DEFAULT NOW()
-);
--- Prompts table
-CREATE TABLE prompts (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES users(id),
-    original_prompt TEXT NOT NULL,
-    enhanced_prompt TEXT,
-    genre VARCHAR(100),
-    mood VARCHAR(100),
-    created_at TIMESTAMP DEFAULT NOW()
-);
--- Tracks table
-CREATE TABLE tracks (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES users(id),
-    prompt_id UUID REFERENCES prompts(id),
-    title VARCHAR(255),
-    audio_url TEXT,
-    waveform_url TEXT,
-    duration FLOAT,
-    status VARCHAR(50) DEFAULT 'pending',
-    progress INT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT NOW()
-);
--- Grammy Scores table
-CREATE TABLE grammy_scores (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    track_id UUID REFERENCES tracks(id),
-    overall_score FLOAT,
-    production_quality FLOAT,
-    commercial_appeal FLOAT,
-    innovation FLOAT,
-    emotional_impact FLOAT,
-    radio_readiness FLOAT,
-    insights JSONB,
-    created_at TIMESTAMP DEFAULT NOW()
-);
+Clone any voice from a 30–60 second reference clip using So-VITS-SVC (Soft-VC). Includes pitch shifting (±12 semitones), auto-tune, and 20+ built-in style presets (Pop Female, R&B Male, Hip Hop, Country, and more).
 
-🔄 Request Flow Examples
-Example 1: Song Generation
-1. User enters prompt: "Chill lo-fi hip hop, 90 BPM"
-   └─> Frontend: PromptInput.tsx
-2. Frontend calls API: POST /api/songgen
-   └─> Payload: { prompt: "...", duration: 60, quality: "high" }
-3. API validates request, checks quota
-   └─> auth.py: verify_token()
-   └─> songgen.py: check_user_quota()
-4. Task queued to Celery
-   └─> celery_app.send_task("generate_song_task")
-5. Worker picks up task
-   └─> song_tasks.py: generate_song_task()
-   └─> Calls: openai_service.enhance_prompt()
-   └─> Calls: musicgen_service.generate_audio()
-6. Progress updates sent to DB
-   └─> 25% → 50% → 75% → 100%
-7. Audio file uploaded to Supabase Storage
-   └─> supabase_client.upload_file()
-8. Track record created in DB
-   └─> Track status: "completed"
-   └─> Audio URL stored
-9. Frontend polls for completion
-   └─> GET /api/tracks/{track_id}
-   └─> Returns: { status: "completed", audio_url: "..." }
-10. User plays audio
-    └─> AudioVisualizer.tsx renders waveform
+---
 
-Example 2: Grammy Meter Analysis
-1. User uploads track or selects from library
-   └─> Frontend: Dashboard.tsx
-2. Frontend calls API: POST /api/grammy-meter/analyze
-   └─> Payload: { track_id: "uuid" }
-3. Task queued to scoring queue
-   └─> celery_app.send_task("analyze_track_task")
-4. Worker downloads audio from Supabase
-   └─> meter_tasks.py: analyze_track_task()
-5. Audio features extracted
-   └─> librosa.load() → audio array
-   └─> Extract: tempo, spectral features, dynamics
-6. ONNX model predicts scores
-   └─> hit_score_service.calculate_score()
-   └─> Returns: { overall: 82, categories: {...} }
-7. Insights generated by GPT-4
-   └─> openai_service.generate_insights()
-8. Score record saved to DB
-   └─> grammy_scores table
-9. Frontend displays results
-   └─> MeterGauge.tsx shows circular gauge
-   └─> Category breakdown + recommendations
+## 🛠 Tech Stack
 
-🚀 Deployment Architecture
-Production Infrastructure
-┌────────────────────────────────────────────────────────────┐
-│                      CLOUDFLARE CDN                        │
-│                   (Static Assets, DDoS)                    │
-└────────────────────────────┬───────────────────────────────┘
-                             │
-        ┌────────────────────┼────────────────────┐
-        │                    │                    │
-        ▼                    ▼                    ▼
-┌──────────────┐    ┌─────────────────┐    ┌──────────────┐
-│   VERCEL     │    │    AWS ECS      │    │   SUPABASE   │
-│  (Frontend)  │    │   (Backend)     │    │  (Database)  │
-│              │    │                 │    │              │
-│ • Next.js    │◄───┤ • FastAPI       │◄───┤ • PostgreSQL │
-│ • CDN Edge   │    │ • Celery Workers│    │ • Storage    │
-│ • Auto Scale │    │ • Auto Scale    │    │ • Auth       │
-└──────────────┘    │ • Load Balancer │    └──────────────┘
-                    └─────────────────┘
-                             │
-                    ┌────────┴────────┐
-                    │                 │
-                    ▼                 ▼
-            ┌──────────────┐  ┌──────────────┐
-            │ REDIS CLOUD  │  │  SENTRY.io   │
-            │ (Broker)     │  │ (Monitoring) │
-            └──────────────┘  └──────────────┘
+| Layer | Technology |
+|-------|-----------|
+| **Frontend** | Next.js 14, React 18, TypeScript 5, Tailwind CSS 3.4, Zustand, WaveSurfer.js |
+| **Backend** | FastAPI 0.109, Python 3.11, Pydantic v2 |
+| **Task Queue** | Celery 5.3, Redis (broker + result backend) |
+| **AI / ML** | OpenAI GPT-4, Meta MusicGen, So-VITS-SVC, Matchering, Custom ONNX |
+| **Database** | PostgreSQL via Supabase (row-level security, PgBouncer) |
+| **Storage** | Supabase Storage (S3-compatible) |
+| **Hosting** | AWS ECS (backend + workers) · Vercel (frontend) · Cloudflare CDN |
+| **Observability** | Sentry, CloudWatch, PostHog |
+| **CI/CD** | GitHub Actions (lint → test → build → deploy) |
 
-Scaling Strategy
-Frontend (Vercel):
+---
 
-Auto-scales globally via CDN
-Serverless functions for API routes
-Edge caching for static assets
-Backend (AWS ECS):
+## 🏗️ Architecture
 
-Horizontal scaling based on CPU/memory
-Min: 2 instances, Max: 20 instances
-Load balancer distributes traffic
-Workers (AWS ECS):
+```
++-------------------------------------------------------------------------+
+|                            USER INTERFACE                               |
+|          Next.js (Web)   ·   React Native (Mobile)   ·   Swagger       |
++------------------------------------+------------------------------------+
+                                     | HTTPS
+                                     v
++-------------------------------------------------------------------------+
+|                        API GATEWAY  (FastAPI)                           |
+|   /auth   /prompt   /songgen   /vocalgen   /mixmaster   /grammy-meter  |
+|   ────────────────────── Middleware ──────────────────────────────────  |
+|      CORS · Rate Limit (100 req/min) · JWT Auth · Request Logging      |
++---------------------+---------------------------------+-----------------+
+                      |                                 |
+          +-----------v-----------+         +-----------v-----------+
+          |    CELERY WORKERS     |         |   SUPABASE (DB +      |
+          |  Generation  (GPU)    |<--------|   Storage + Auth)     |
+          |  Mastering   (CPU)    |         +-----------------------+
+          |  Scoring     (CPU)    |
+          +-----------+-----------+
+                      |
+          +-----------v-----------+
+          |     REDIS  BROKER     |
+          |  queues: generation   |
+          |          mastering    |
+          |          scoring      |
+          +-----------+-----------+
+                      |
+       +--------------+--------------+
+       v              v              v
+  +----------+  +-----------+  +----------+
+  | OpenAI   |  | MusicGen  |  |Matchering|
+  |  GPT-4   |  | (Meta AI) |  |(Mastering|
+  +----------+  +-----------+  +----------+
+```
 
-Separate task definitions per queue
-GPU instances for generation (g4dn.xlarge)
-CPU instances for mastering (c6i.2xlarge)
-Database (Supabase):
+**Data flow (song generation):**
 
-Managed PostgreSQL with auto-backups
-Read replicas for scaling
-Connection pooling (PgBouncer)
-📊 Performance Metrics
-Target SLAs:
+```
+User Prompt
+  --> POST /api/songgen
+  --> JWT auth + quota check
+  --> Celery task queued
+  --> GPT-4 enhances prompt
+  --> MusicGen generates audio
+  --> Matchering masters track
+  --> File uploaded to Supabase Storage
+  --> Track record saved to DB
+  --> Frontend polls GET /api/tracks/{id}
+  --> Waveform rendered in AudioVisualizer
+```
 
-API Response Time: < 200ms (p95)
-Song Generation: < 60s (p95)
-Mastering: < 30s (p95)
-Grammy Meter: < 15s (p95)
-Uptime: 99.9%
-Optimization Techniques:
+---
 
-Caching: Redis for frequent queries
-CDN: Static assets served from edge
-Database Indexes: On user_id, created_at
-Connection Pooling: Max 100 concurrent
-Task Batching: Combine similar tasks
-🔐 Security Architecture
-Defense in Depth:
+## ⚡ Quick Start
 
-Network Layer:
+### Prerequisites
 
-Cloudflare WAF (DDoS protection)
-Rate limiting (100 req/min per IP)
-IP blacklisting for abuse
-Application Layer:
+- Docker & Docker Compose
+- OpenAI API key
+- Supabase project (free tier works)
 
-JWT authentication (RS256)
-Input validation (Pydantic)
-SQL injection prevention (ORM)
-XSS protection (React escaping)
-Data Layer:
+### Local Development
 
-Encryption at rest (AES-256)
-Encryption in transit (TLS 1.3)
-Database row-level security
-Sensitive data masking
-Secrets Management:
+```bash
+# 1. Clone the repository
+git clone https://github.com/fxgeniusllc-oss/Ai-Music-GRAMMYV2.git
+cd Ai-Music-GRAMMYV2
 
-AWS Secrets Manager
-Environment variables
-Key rotation (90 days)
-📈 Monitoring & Observability
-Logging Stack:
+# 2. Configure environment
+cp .env.example .env
+# Open .env and fill in OPENAI_API_KEY, SUPABASE_URL, SUPABASE_KEY
 
-Application Logs → CloudWatch → S3 Archive
-                → Sentry (Errors)
-                → PostHog (Analytics)
+# 3. Start all services (backend, workers, frontend, Redis, PostgreSQL)
+docker-compose up -d
 
-Metrics Tracked:
+# 4. Open the app
+#   Frontend:        http://localhost:3000
+#   API docs:        http://localhost:8000/api/docs
+#   Celery monitor:  http://localhost:5555
+```
 
-Request rate, latency, errors (RED)
-CPU, memory, disk (USE)
-Task queue depth
-User engagement (DAU, MAU)
-Revenue metrics (MRR, churn)
-Alerts:
+### ARM / Apple Silicon
 
-Error rate > 1% → PagerDuty
-API latency > 500ms → Slack
-Queue depth > 1000 → Email
-Disk usage > 80% → SMS
-🔄 CI/CD Pipeline
-GitHub Push
-    │
-    ├─> GitHub Actions
-    │   ├─> Lint (flake8, ESLint)
-    │   ├─> Type Check (mypy, TypeScript)
-    │   ├─> Unit Tests (pytest, Jest)
-    │   ├─> Integration Tests
-    │   └─> Build Docker Images
-    │
-    ├─> Push to ECR/Docker Hub
-    │
-    └─> Deploy
-        ├─> Staging (Auto)
-        ├─> Manual Approval
-        └─> Production (Blue/Green)
+Grammy Engine auto-detects ARM architecture and enables lightweight mode:
 
-🎯 Future Architecture Enhancements
-Roadmap:
+```bash
+# Optional: override defaults
+export LIGHTWEIGHT_MODE=auto   # auto | true | false
+export MODEL_SIZE=small        # small | medium | large
+export MODEL_PRECISION=int8    # int8 | float16 | float32
 
-Q2 2026:
+docker-compose up -d
+```
 
-WebSocket real-time updates
-GraphQL API alongside REST
-Multi-region deployment (US, EU, Asia)
-Q3 2025:
+See [ARM_OPTIMIZATION.md](./ARM_OPTIMIZATION.md) for a full performance comparison and configuration reference.
 
-Kubernetes migration (from ECS)
-Service mesh (Istio)
-Event-driven architecture (Kafka)
-Q4 2025:
+---
 
-Microservices split (auth, generation, mastering)
-ML model versioning (MLflow)
-Edge computing for generation
+## 📡 API Reference
+
+All endpoints require an `Authorization: ****** header (except `/api/auth`).
+
+| Module | Endpoint | Description |
+|--------|---------|-------------|
+| Auth | `POST /api/auth/register` | Create account |
+| Auth | `POST /api/auth/login` | Obtain JWT |
+| Auth | `POST /api/auth/refresh` | Refresh token |
+| Prompt | `POST /api/prompt/enhance` | GPT-4 prompt enhancement |
+| Song Gen | `POST /api/songgen` | Queue song generation |
+| Song Gen | `GET /api/songgen/{task_id}` | Poll task status |
+| Vocal Gen | `POST /api/vocalgen` | Generate / clone vocals |
+| Mastering | `POST /api/mixmaster` | Master a track |
+| Grammy Meter | `POST /api/grammy-meter/analyze` | Queue hit-score analysis |
+| Grammy Meter | `GET /api/grammy-meter/{task_id}` | Poll score result |
+| Upload | `POST /api/upload` | Upload audio file |
+
+Full request/response examples: **[API_DOCS.md](./API_DOCS.md)**
+
+**Rate limits:** 100 req/min (free) · 1,000 req/min (Pro) · 10,000 req/hr (Enterprise)
+
+---
+
+## 💰 Pricing
+
+| Plan | Price | Tracks/mo | Grammy Meter | Mastering | Voice Clone | API Access |
+|------|-------|-----------|-------------|-----------|-------------|------------|
+| **Starter** | Free | 3 (30 s max) | No | No | No | No |
+| **Pro Creator** | $29/mo | Unlimited | Yes | Yes | Yes | No |
+| **Label** | $199/mo | Unlimited | Yes | Yes | Yes | Yes |
+| **Enterprise** | $999+/mo | Unlimited | Yes | Yes | Yes | White-label |
+
+**Unit economics (Pro tier):** LTV $624 · CAC $45 · LTV/CAC **13.9×** · Gross margin **85%**
+
+---
+
+## 🚢 Deployment
+
+### Production (AWS ECS + Vercel)
+
+**Backend:**
+
+```bash
+# Build and push image
+docker build -t grammy-backend ./backend
+docker push <ECR_REPO>/grammy-backend:latest
+
+# Roll out new task definition
+aws ecs update-service \
+  --cluster grammy-cluster \
+  --service backend \
+  --force-new-deployment
+```
+
+**Frontend:**
+
+```bash
+cd frontend
+vercel --prod
+```
+
+**Scaling targets:**
+
+| Component | Strategy |
+|-----------|---------|
+| Frontend | Vercel edge, auto-scales globally |
+| Backend | AWS ECS, 2–20 instances (CPU/memory triggers) |
+| Workers — generation | GPU instances `g4dn.xlarge` |
+| Workers — mastering/scoring | CPU instances `c6i.2xlarge` |
+| Database | Supabase managed PostgreSQL with PgBouncer + read replicas |
+
+Full guide: **[DEPLOYMENT.md](./DEPLOYMENT.md)**
+
+---
+
+## 📊 Performance
+
+| Metric | Target (p95) |
+|--------|-------------|
+| API response time | < 200 ms |
+| Song generation | < 60 s |
+| Mastering | < 30 s |
+| Grammy Meter analysis | < 15 s |
+| Uptime SLA | 99.9% |
+
+**Optimisation techniques:** Redis query caching · CDN edge delivery · DB indexes on `user_id` / `created_at` · PgBouncer connection pooling · Celery task batching
+
+---
+
+## 🔐 Security
+
+| Layer | Controls |
+|-------|---------|
+| Network | Cloudflare WAF · DDoS protection · Rate limiting · IP blacklisting |
+| Application | JWT RS256 · Pydantic input validation · SQLAlchemy ORM (no raw SQL) · React XSS escaping |
+| Data | AES-256 encryption at rest · TLS 1.3 in transit · Supabase row-level security |
+| Secrets | AWS Secrets Manager · 90-day key rotation |
+
+---
+
+## 🗺️ Roadmap
+
+| Quarter | Milestone |
+|---------|----------|
+| Q2 2026 | WebSocket real-time progress · GraphQL API · Multi-region (US / EU / Asia) |
+| Q3 2026 | Kubernetes migration (from ECS) · Istio service mesh · Kafka event bus |
+| Q4 2026 | Auth / generation / mastering microservice split · MLflow model versioning · Edge inference |
+
+Full 3-year roadmap: **[ROADMAP.md](./ROADMAP.md)**
+
+---
+
+## 📚 Documentation
+
+| Document | Description |
+|----------|-------------|
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | Detailed system diagrams and component specs |
+| [API_DOCS.md](./API_DOCS.md) | Complete REST API reference with examples |
+| [DEPLOYMENT.md](./DEPLOYMENT.md) | Production deployment guide (AWS + Vercel) |
+| [ARM_OPTIMIZATION.md](./ARM_OPTIMIZATION.md) | ARM64 / Apple Silicon performance guide |
+| [SUMMARY.md](./SUMMARY.md) | Executive summary and project overview |
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository and create a feature branch.
+2. Follow the existing code style (Python: `flake8` + `mypy`; TypeScript: `ESLint`).
+3. Add or update tests for your changes.
+4. Open a pull request — the CI pipeline will run lint, type-check, and unit tests automatically.
+
+---
+
+## 📞 Contact
+
+| | |
+|-|-|
+| Website | [grammyengine.com](https://grammyengine.com) |
+| General | hello@grammyengine.com |
+| Investors | invest@grammyengine.com |
+| Enterprise / Partners | partners@grammyengine.com |
+
+---
+
+<div align="center">
+
+**Built with ❤️ by Omni-Tech-Stack**
+
+*Version 1.0.0 · Last updated 2026-06-25*
+
+</div>
